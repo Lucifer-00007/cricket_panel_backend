@@ -338,12 +338,63 @@ const ScoreController = {
 			res.status(400).json({ success: false, error: { message: error.message } });
 
 		}
-	}
+	},
 
 	// sportskeeda
+	sportskeeda: async(req, res) => {
+		var requestOptions = {
+			"credentials": "omit",
+			"headers": {
+				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+				"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+				"Accept-Language": "en-US,en;q=0.5",
+				"Upgrade-Insecure-Requests": "1",
+				"Sec-Fetch-Dest": "document",
+				"Sec-Fetch-Mode": "navigate",
+				"Sec-Fetch-Site": "none",
+				"Sec-Fetch-User": "?1"
+			},
+			"method": "GET",
+			"mode": "cors"
+		}
 
+		try {
+			const url = await fetch(
+				`https://push.sportskeeda.com/get-cricket-matches/featured`,
+				requestOptions
+			);
+			const urls_json = await url.json();
+	
+			if (urls_json) {
+				res.status(200).json(urls_json);
+			}	
+		}catch (error) {
+			console.log('error -->', error);
+			res.status(400).json({ success: false, error: { message: error.message } });
+
+		}
+	},
 
 	// espn
+	espn: async(req, res) => {
+		var requestOptions = {
+		}
+			
+		try {
+			const url = await fetch(
+				`https://www.url.com`,
+				requestOptions
+			);
+			const urls_json = await url.json();
+	
+			if (urls_json) {
+				res.status(200).json(urls_json);
+			}	
+		}catch (error) {
+			console.log('error -->', error);
+			res.status(400).json({ success: false, error: { message: error.message } });
+		}
+	}
 
 	// cricwick
 
@@ -358,6 +409,5 @@ const ScoreController = {
 }
 
 module.exports = { ScoreController };
-
 
 

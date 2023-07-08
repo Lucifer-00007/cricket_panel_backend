@@ -19,6 +19,8 @@ app.get('/', (req, res) => {
 
 app.use("/cbz", ScoreController.cricbuzz);
 
+app.use("/sk", ScoreController.sportskeeda);
+
 
 app.get('*/:val', (req, res) => {
   res.status(404).json({status: false, errMsg: `Opps! '${req.params.val}' Page Not Found!`
