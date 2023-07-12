@@ -1,4 +1,6 @@
 const {ScoreController} = require("./api");
+const {TestController} = require("./test");
+
 const express = require('express')
 const path = require('path')
 var cors = require("cors")
@@ -20,6 +22,9 @@ app.get('/', (req, res) => {
 app.use("/cbz", ScoreController.cricbuzz);
 
 app.use("/sk", ScoreController.sportskeeda);
+
+app.use("/et", TestController.espn);
+app.use("/espn", ScoreController.espn);
 
 
 app.get('*/:val', (req, res) => {
