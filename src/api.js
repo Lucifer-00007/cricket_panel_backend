@@ -47,7 +47,7 @@ const ScoreController = {
 					// console.log("Initial_Match_id:", `https://www.cricbuzz.com/api/cricket-match/commentary/${id}`);
 					TotalMatch = TotalMatch + 1;
 				});
-				console.log("Initial match: ", TotalMatch)
+				// console.log("Initial match: ", TotalMatch)
 
 
 				var OtherTotalMatch = 0
@@ -66,7 +66,7 @@ const ScoreController = {
 						}
 					}
 				});
-				console.log("New added match: ", OtherTotalMatch)
+				// console.log("New added match: ", OtherTotalMatch)
 
 				return innerReturnFunction({ crickbuzzurls });
 			}).then(({ crickbuzzurls }) => {
@@ -1029,6 +1029,9 @@ const ScoreController = {
         }
     }
 
+	// nw18
+	
+	
 	// cricwick
 
 	// cricline
@@ -1036,8 +1039,6 @@ const ScoreController = {
 	// crickexchange
 
 	// cricketmazza
-
-	// nw18
 
 }
 
