@@ -23,7 +23,6 @@ app.use("/cbz", ScoreController.cricbuzz);
 
 app.use("/sk", ScoreController.sportskeeda);
 
-app.use("/et", TestController.espn);
 app.use("/espn", ScoreController.espn);
 
 
