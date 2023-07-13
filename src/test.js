@@ -5,7 +5,7 @@ const fetch = (...args) => import("node-fetch").then(({ default: fetch }) => fet
 
 const TestController = {
     espn: async (req, res) => {
-        var requestOptions1 = {
+        const requestOptions1 = {
             "credentials": "include",
             "headers": {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
@@ -20,7 +20,7 @@ const TestController = {
             "mode": "cors"
         }
 
-        var requestOptions2 = {
+        const requestOptions2 = {
             "credentials": "include",
             "headers": {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
@@ -41,40 +41,43 @@ const TestController = {
         try {
             const response = await fetch(
                 "https://hs-consumer-api.espncricinfo.com/v1/pages/matches/current",
-                requestOptions2
+                requestOptions1
             )
             const response_data = await response.json()
             await Promise.allSettled(response_data.matches.map(async (val) => {
-                var req_url = `https://hs-consumer-api.espncricinfo.com/v1/pages/match/scorecard?lang=en&seriesId=1&matchId=${val.objectId}`;
-                // espn_match_url.push(req_url);
+                const req_url = `https://hs-consumer-api.espncricinfo.com/v1/pages/match/scorecard?lang=en&seriesId=1&matchId=${val.objectId}`;
 
                 const match_response = await fetch(req_url, requestOptions2)
                 const score_data = await match_response.json();
 
-                var match_details = score_data.match;
-                var match_content = score_data.content;
+                const match_details = score_data.match;
+                const match_content = score_data.content;
 
-                if (typeof match_content != "undefined") {
-                    if (match_content.innings != null) {
-                        console.log("test2")
-                        
-                        var current_inns = match_content.inning.inningNumber
-                            ? match_content.inning.inningNumber * 1
+                if (typeof match_content != "undefined" && typeof match_details != "undefined") {
+
+                    // Get_Current_Batsmens
+                    if (match_content.innings && match_content.innings != null) {
+
+                        // Get_Live_Innings
+                        const current_inns = match_details.liveInning != null
+                            ? match_details.liveInning * 1
                             : 0;
-                        var batsmens = match_content
+
+                        // Get_Live_Innings_Batters
+                        const batsmens = match_content
                             ? match_content.innings.length > 0
                                 ? match_content.innings[current_inns - 1]
                                     .inningBatsmen
                                 : ""
                             : "";
-                        console.log('batsmens: ', batsmens);
                         var current_batsmen_onstrick = "";
                         var current_batsmen_nonstrick = "";
                         var batsmen_onstrick_details = [];
                         var batsmen_nonstrick_details = [];
 
                         if (batsmens !== "") {
-                            batsmens.map(async (batsmen) =>{
+                            batsmens.map(async (batsmen) => {
+                                // Current_Batsmen_Onstrick
                                 if (
                                     batsmen.battedType === "yes" &&
                                     batsmen.isOut === false &&
@@ -95,6 +98,7 @@ const TestController = {
                                         : "0";
                                 }
 
+                                // Current_Batsmen_Nonstrick
                                 if (
                                     batsmen.battedType === "yes" &&
                                     batsmen.isOut === false &&
@@ -118,15 +122,15 @@ const TestController = {
                         }
                     }
 
+                    // Last_6_Balls
                     if (match_content.supportInfo.liveSummary != null) {
                         var ball_run = "";
                         var last_6_balls_req = [];
 
-                        var last_6_balls_full =
+                        const last_6_balls_full =
                             match_content.supportInfo.liveSummary.recentBalls.slice(0, 6);
 
-                        for (let ball of last_6_balls_full) {
-                            // console.log(ball);
+                        last_6_balls_full.map(async (ball) => {    
 
                             if (ball.isWicket === true) {
                                 ball_run = ball.totalRuns + "W";
@@ -172,10 +176,10 @@ const TestController = {
                                 ball_run = ball.totalRuns + "nb";
                             }
                             last_6_balls_req.push(ball_run);
-                        }
+                        })
                     }
 
-                    var obj = {
+                    const obj = {
                         match_url: `https://www.espncricinfo.com/series/${match_details.series.slug
                             }-${match_details.series.objectId}/${match_details.slug}-${match_details.objectId
                             }/${match_details.stage === "SCHEDULED"
@@ -352,15 +356,10 @@ const TestController = {
                                             : "0",
                         },
 
-
-                        bw:
-                            match_content.supportInfo.liveSummary != null
-                                ? match_content.supportInfo.liveSummary.bowlers.length > 0
-                                    ? match_content.supportInfo.liveSummary.bowlers[0].player
-                                        .longName
-                                    : ""
-                                : "",
-
+                        cs: {
+                            msg: match_details.statusText,
+                            ts: "",
+                        },
 
 
                         iov:
@@ -375,43 +374,31 @@ const TestController = {
                         p1: current_batsmen_onstrick
                             ? current_batsmen_onstrick.trim()
                             : "",
+
                         p2: current_batsmen_nonstrick
                             ? current_batsmen_nonstrick.trim()
                             : "",
+
+                        os: 'p1',
+
                         b1s: batsmen_onstrick_details
-                            ? `${batsmen_onstrick_details[0]
-                                ? batsmen_onstrick_details[0]
-                                : "0"
-                            },${batsmen_onstrick_details[1]
-                                ? batsmen_onstrick_details[1]
-                                : "0"
-                            },${batsmen_onstrick_details[2]
-                                ? batsmen_onstrick_details[2]
-                                : "0"
-                            },${batsmen_onstrick_details[3]
-                                ? batsmen_onstrick_details[3]
-                                : "0"
-                            }`
+                            ? batsmen_onstrick_details.toString()
                             : "",
                         b2s: batsmen_nonstrick_details
-                            ? `${batsmen_nonstrick_details[0]
-                                ? batsmen_nonstrick_details[0]
-                                : "0"
-                            },${batsmen_nonstrick_details[1]
-                                ? batsmen_nonstrick_details[1]
-                                : "0"
-                            },${batsmen_nonstrick_details[2]
-                                ? batsmen_nonstrick_details[2]
-                                : "0"
-                            },${batsmen_nonstrick_details[3]
-                                ? batsmen_nonstrick_details[3]
-                                : "0"
-                            }`
+                            ? batsmen_nonstrick_details.toString()
                             : "",
-                        pb: last_6_balls_req
-                            ? `${last_6_balls_req[0]},${last_6_balls_req[1]},${last_6_balls_req[2]},${last_6_balls_req[3]},${last_6_balls_req[4]},${last_6_balls_req[5]}`
-                            : "",
+                        
+                        bw:
+                            match_content.supportInfo.liveSummary != null
+                                ? match_content.supportInfo.liveSummary.bowlers.length > 0
+                                    ? match_content.supportInfo.liveSummary.bowlers[0].player
+                                        .longName
+                                    : ""
+                                : "",
 
+                        pb: last_6_balls_req
+                            ? last_6_balls_req.toString()
+                            : "",
 
                         title: match_details.slug ? match_details.slug : "",
 
@@ -422,7 +409,6 @@ const TestController = {
                         match_league: match_details.series.name
                             ? match_details.series.name
                             : "",
-
 
                         toss_winner_team:
                             match_details.tossWinnerTeamId === null
@@ -457,16 +443,11 @@ const TestController = {
                                 ? match_details.ground.country.name
                                 : ""
                             }`,
-
-                        cs: {
-                            msg: match_details.statusText,
-                            ts: "",
-                        },
                     };
+                    
+                    finall_result[req_url.split("&matchId=")[1]] = obj;
                 }
-                finall_result[req_url.split("&matchId=")[1]] = obj;
             }));
-            console.log('finall_result-->', finall_result);
             res.status(200).json(finall_result);
         } catch (error) {
             console.log('error -->', error);
