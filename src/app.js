@@ -25,6 +25,14 @@ app.use("/sk", ScoreController.sportskeeda);
 
 app.use("/espn", ScoreController.espn);
 
+app.use("/nw18", ScoreController.nw18);
+
+
+
+//test 
+app.use("/t", TestController.test);
+
+
 
 app.get('*/:val', (req, res) => {
   res.status(404).json({status: false, errMsg: `Opps! '${req.params.val}' Page Not Found!`

@@ -449,7 +449,7 @@ const ScoreController = {
 				const score_obj = {
 					match_urls: `https://www.sportskeeda.com/live-cricket-score/${sc.topic_slug}`,
 
-					match_api_url: `https://cmc.sportskeeda.com/live-cricket-score/${sc.topic_slug}/ajax?lang=en`,
+					match_api_url: converted,
 
 					match_status: (sc.match_status ? sc.match_status : ''),
 
@@ -1027,10 +1027,205 @@ const ScoreController = {
             console.log('error -->', error);
             res.status(400).json({ success: false, error: { message: error.message } });
         }
-    }
+    },
 
 	// nw18
-	
+    nw18: async (req, res) => {
+        var score = {};
+
+        const requestOptions1 = {
+            "credentials": "include",
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.5",
+                "Upgrade-Insecure-Requests": "1",
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "cross-site",
+                "If-Modified-Since": "Fri, 14 Jul 2023 09:46:07 GMT",
+                "If-None-Match": "\"0x8DB844F25C6B4E6\""
+            },
+            "method": "GET",
+            "mode": "cors"
+        }
+
+        const requestOptions2 = {
+            "credentials": "include",
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.5",
+                "Upgrade-Insecure-Requests": "1",
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "none",
+                "Sec-Fetch-User": "?1",
+                "If-Modified-Since": "Thu, 13 Jul 2023 13:39:54 GMT",
+                "If-None-Match": "\"0x8DB83A6A3F98385\""
+            },
+            "method": "GET",
+            "mode": "cors"
+        }
+
+        try {
+            const response = await fetch(
+                "https://cricketnext.nw18.com/sports/csr/feed/recent_matches_en.json",
+                requestOptions1
+            );
+
+            const response_data = await response.json();
+
+            await Promise.allSettled(response_data.map(async (val) => {
+
+                const req_url = `https://cricketnext.nw18.com/sports/csr/feed/match_${val.matchid}_en.json`;
+                const match_response = await fetch(req_url, requestOptions2);
+                const sc = await match_response.json();
+
+                // Get_Live_Innings
+                var live_innings = '';
+                if(sc.fourthInnings.status === 1){
+                    live_innings = sc.fourthInnings;
+                }else if(sc.thirdInnings.status === 1){
+                    live_innings = sc.thirdInnings;
+                }else if(sc.secondInnings.status === 1){
+                    live_innings = sc.secondInnings;
+                }else if(sc.firstInnings.status === 1){  
+                    live_innings = sc.firstInnings;
+                }    
+
+                // Get Live_Batsmens & Live_Bowler
+                var batsmen_onstrick = '';
+                var batsmen_nonstrick = '';
+                var live_bowler = '';
+                if(live_innings != '' && live_innings.status === 1){
+                    // For Batsmen
+                    if(live_innings.livePlayers.BatsMan[0].Striker === "yes"){
+                        batsmen_onstrick = live_innings.livePlayers.BatsMan[0];
+                        batsmen_nonstrick = live_innings.livePlayers.BatsMan[1];
+                    }else {
+                        batsmen_onstrick = live_innings.livePlayers.BatsMan[1];
+                        batsmen_nonstrick = live_innings.livePlayers.BatsMan[0];
+
+                    }
+                    // For Bowler
+                    if(live_innings.livePlayers.Bowler[0].Bowling === "yes"){
+                        live_bowler = live_innings.livePlayers.Bowler[0].name;
+                    }else {
+                        live_bowler = live_innings.livePlayers.Bowler[1].name;
+                    }
+                }
+
+                const score_obj = {
+                    match_url: `https://www.news18.com/cricketnext/live-score/${sc.teamfa}-vs-${sc.teamfb}-live-score-${sc.matchCode}.html`.replace(/\s/gm, "-"),
+
+                    match_api_url: req_url,
+
+                    match_status: (sc.status ? sc.status : ''),
+
+                    t1: {
+                        f: (sc.teamfa ? sc.teamfa : ""),
+                        n: (sc.teama ? sc.teama : ""),
+                    },
+
+                    t2: {
+                        f: (sc.teamfb ? sc.teamfb : ""),
+                        n: (sc.teamb ? sc.teamb : ""),
+                    },
+
+                    i1: {
+                        sc:
+                            sc.firstInnings && sc.firstInnings.Equation
+                                ? sc.firstInnings.Equation.Total
+                                : "0",
+                        wk:
+                            sc.firstInnings && sc.firstInnings.Equation
+                                ? sc.firstInnings.Equation.Wickets
+                                : "0",
+                        ov:
+                            sc.firstInnings && sc.firstInnings.Equation
+                                ? sc.firstInnings.Equation.Overs
+                                : "0",
+                    },
+
+                    i2: {
+                        sc:
+                            sc.secondInnings && sc.secondInnings.Equation
+                                ? sc.secondInnings.Equation.Total
+                                : "0",
+                        wk:
+                            sc.secondInnings && sc.secondInnings.Equation
+                                ? sc.secondInnings.Equation.Wickets
+                                : "0",
+                        ov:
+                            sc.secondInnings && sc.secondInnings.Equation
+                                ? sc.secondInnings.Equation.Overs
+                                : "0",
+                    },
+
+                    i3: {
+                        sc:
+                            sc.thirdInnings && sc.thirdInnings.Equation
+                                ? sc.thirdInnings.Equation.Total
+                                : "0",
+                        wk:
+                            sc.thirdInnings && sc.thirdInnings.Equation
+                                ? sc.thirdInnings.Equation.Wickets
+                                : "0",
+                        ov:
+                            sc.thirdInnings && sc.thirdInnings.Equation
+                                ? sc.thirdInnings.Equation.Overs
+                                : "0",
+                    },
+
+                    i4: {
+                        sc:
+                            sc.fourthInnings && sc.fourthInnings.Equation
+                                ? sc.fourthInnings.Equation.Total
+                                : "0",
+                        wk:
+                            sc.fourthInnings && sc.fourthInnings.Equation
+                                ? sc.fourthInnings.Equation.Wickets
+                                : "0",
+                        ov:
+                            sc.fourthInnings && sc.fourthInnings.Equation
+                                ? sc.fourthInnings.Equation.Overs
+                                : "0",
+                    },
+
+                    cs: {
+                        msg: sc.matchresult != null ? sc.matchresult : sc.Toss_mov,
+                    },
+
+                    iov: "",
+
+                    p1: batsmen_onstrick.name ? batsmen_onstrick.name : '',
+
+                    p2: batsmen_nonstrick.name ? batsmen_nonstrick.name : '',
+
+                    os: "p1",
+
+                    b1s: `${batsmen_onstrick.Runs},${batsmen_onstrick.BallsFaced},${batsmen_onstrick.four},${batsmen_onstrick.six}`,
+
+                    b2s: `${batsmen_nonstrick.Runs},${batsmen_nonstrick.BallsFaced},${batsmen_nonstrick.four},${batsmen_nonstrick.six}`,
+
+                    bw: live_bowler,
+
+                    pb: "",
+                };
+
+                score[`nw18${sc.matchCode.substring(15)}`] = score_obj;
+
+            }));
+
+            res.status(200).json(score);;
+
+        } catch (error) {
+            console.log('error -->', error);
+            res.status(400).json({ success: false, error: { message: error.message } });
+        }
+
+    },
 	
 	// cricwick
 
@@ -1039,6 +1234,8 @@ const ScoreController = {
 	// crickexchange
 
 	// cricketmazza
+
+	
 
 }
 
