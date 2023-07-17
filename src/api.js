@@ -1218,7 +1218,7 @@ const ScoreController = {
 
             }));
 
-            res.status(200).json(score);;
+            res.status(200).json(score);
 
         } catch (error) {
             console.log('error -->', error);
@@ -1227,8 +1227,6 @@ const ScoreController = {
 
     },
 	
-	// cricwick
-
 	// cricline
 
 	// crickexchange
