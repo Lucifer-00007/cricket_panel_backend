@@ -27,6 +27,7 @@ app.use("/espn", ScoreController.espn);
 
 app.use("/nw18", ScoreController.nw18);
 
+app.use("/clg", ScoreController.cricketlineguru);
 
 
 //test 
