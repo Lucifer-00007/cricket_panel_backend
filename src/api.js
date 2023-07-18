@@ -81,17 +81,17 @@ const ScoreController = {
                                     // console.log("No_of_inns: ", innerhtml.miniscore.matchScoreDetails.inningsScoreList.length);
 
                                     const obj = {
-                                        start_date_time: innerhtml.matchHeader.matchStartTimestamp,
+                                        start_date_time: innerhtml.matchHeader.matchStartTimestamp ? innerhtml.matchHeader.matchStartTimestamp : '',
 
-                                        match_league: innerhtml.matchHeader.seriesDesc,
+                                        match_league: innerhtml.matchHeader.seriesDesc ? innerhtml.matchHeader.seriesDesc : '',
 
-                                        completed: innerhtml.matchHeader.complete,
+                                        completed: innerhtml.matchHeader.complete ? innerhtml.matchHeader.complete : '',
 
-                                        runrate: innerhtml.miniscore.currentRunRate,
+                                        runrate: innerhtml.miniscore.currentRunRate ? innerhtml.miniscore.currentRunRate : '',
 
-                                        requiredRunRate: innerhtml.miniscore.requiredRunRate,
+                                        requiredRunRate: innerhtml.miniscore.requiredRunRate ? innerhtml.miniscore.requiredRunRate : '',
 
-                                        match_state: innerhtml.matchHeader.state,
+                                        match_status: innerhtml.matchHeader.state ? innerhtml.matchHeader.state : '',
 
                                         current_inns: (innerhtml.miniscore.inningsId ? innerhtml.miniscore.inningsId : ''),
 
@@ -145,7 +145,7 @@ const ScoreController = {
                                         },
 
                                         cs: {
-                                            msg: innerhtml.miniscore.status,
+                                            msg: innerhtml.miniscore.status ? innerhtml.miniscore.status : '',
                                         },
                                         iov: '',
                                         p1: innerhtml.miniscore.batsmanStriker
@@ -228,26 +228,26 @@ const ScoreController = {
                                     // console.log("No_of_inns: ", '---');
 
                                     const obj = {
-                                        start_date_time: innerhtml.matchHeader.matchStartTimestamp,
+                                        start_date_time: innerhtml.matchHeader.matchStartTimestamp ? innerhtml.matchHeader.matchStartTimestamp : '',
 
-                                        match_league: innerhtml.matchHeader.seriesDesc,
+                                        match_league: innerhtml.matchHeader.seriesDesc ? innerhtml.matchHeader.seriesDesc : '',
 
-                                        completed: innerhtml.matchHeader.complete,
+                                        completed: innerhtml.matchHeader.complete ? innerhtml.matchHeader.complete : '',
 
                                         runrate: '',
 
                                         requiredRunRate: '',
 
-                                        match_state: innerhtml.matchHeader.state,
+                                        match_status: innerhtml.matchHeader.state ? innerhtml.matchHeader.state : '',
 
                                         current_inns: '',
 
                                         t1: {
-                                            f: innerhtml.matchHeader.team1.shortName,
+                                            f: innerhtml.matchHeader.team1.shortName ? innerhtml.matchHeader.team1.shortName : '',
                                         },
 
                                         t2: {
-                                            f: innerhtml.matchHeader.team2.shortName,
+                                            f: innerhtml.matchHeader.team2.shortName ? innerhtml.matchHeader.team2.shortName : '',
                                         },
 
                                         i1: {
@@ -290,7 +290,7 @@ const ScoreController = {
                                         iov: '',
                                         p1: '',
                                         p2: '',
-                                        os: 'p1',
+                                        os: '',
                                         b1s: `${0, 0, 0, 0}`,
                                         b2s: `${0, 0, 0, 0}`,
                                         bw: '',
@@ -449,18 +449,18 @@ const ScoreController = {
                 const score_obj = {
                     match_urls: `https://www.sportskeeda.com/live-cricket-score/${sc.topic_slug}`,
 
-                    match_api_url: converted,
+                    match_api_url: converted ? converted : '', 
 
                     match_status: (sc.match_status ? sc.match_status : ''),
 
                     t1: {
-                        f: sc.score_strip[0].name,
-                        n: sc.score_strip[0].short_name,
+                        f: sc.score_strip[0].name ? sc.score_strip[0].name : '',
+                        n: sc.score_strip[0].short_name ? sc.score_strip[0].short_name : '',
                     },
 
                     t2: {
-                        f: sc.score_strip[1].name,
-                        n: sc.score_strip[1].short_name,
+                        f: sc.score_strip[1].name ? sc.score_strip[1].name : '',
+                        n: sc.score_strip[1].short_name ? sc.score_strip[1].short_name : '',
                     },
                     i1: {
                         sc:
@@ -765,7 +765,7 @@ const ScoreController = {
                                         : ""
                             }`,
 
-                        match_api_url: req_url,
+                        match_api_url: req_url ? req_url : '',
 
                         match_status: match_details.state ? match_details.state : "",
 
@@ -931,7 +931,7 @@ const ScoreController = {
                         },
 
                         cs: {
-                            msg: match_details.statusText,
+                            msg: match_details.statusText ? match_details.statusText : '',
                             ts: "",
                         },
 
@@ -1119,7 +1119,7 @@ const ScoreController = {
                 const score_obj = {
                     match_url: `https://www.news18.com/cricketnext/live-score/${sc.teamfa}-vs-${sc.teamfb}-live-score-${sc.matchCode}.html`.replace(/\s/gm, "-"),
 
-                    match_api_url: req_url,
+                    match_api_url: req_url ? req_url : '',
 
                     match_status: (sc.status ? sc.status : ''),
 
@@ -1209,7 +1209,7 @@ const ScoreController = {
 
                     b2s: `${batsmen_nonstrick.Runs},${batsmen_nonstrick.BallsFaced},${batsmen_nonstrick.four},${batsmen_nonstrick.six}`,
 
-                    bw: live_bowler,
+                    bw: live_bowler ? live_bowler: '',
 
                     pb: "",
                 };
@@ -1284,7 +1284,11 @@ const ScoreController = {
                         }
 
                         const score_obj = {
-                            status: req_detail.status ? req_detail.status : "",
+                            match_url: `https://www.cricketlineguru.com/match-detail/${val.key}/score`,
+                            
+                            match_api_url: scorecard_url ? scorecard_url: '',
+
+                            match_status: req_detail.status ? req_detail.status : "",
 
                             liveInning: req_detail.inn_order.length > 0 ? req_detail.inn_order.length : "",
 
@@ -1292,12 +1296,12 @@ const ScoreController = {
 
                             t1: {
                                 f: req_detail.teams.t1.name,
-                                n: req_detail.teams.t1.key && req_detail.teams.t1.key.length < 6 ? req_detail.teams.t1.key : req_detail.teams.t1.name.substr(0, 3).toLowerCase(),
+                                n: req_detail.teams.t1.sName && req_detail.teams.t1.sName.length < 6 ? req_detail.teams.t1.sName : req_detail.teams.t1.name.substr(0, 3).toLowerCase(),
                             },
 
                             t2: {
                                 f: req_detail.teams.t2.name,
-                                n: req_detail.teams.t2.key && req_detail.teams.t2.key.length < 6 ? req_detail.teams.t2.key : req_detail.teams.t2.name.substr(0, 3).toLowerCase(),
+                                n: req_detail.teams.t2.sName && req_detail.teams.t2.sName.length < 6 ? req_detail.teams.t2.sName : req_detail.teams.t2.name.substr(0, 3).toLowerCase(),
                             },
 
                             i1: {
