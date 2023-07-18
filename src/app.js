@@ -15,7 +15,7 @@ app.use(cors());
 
 // routes
 app.get('/', (req, res) => {
-  res.status(200).json({status: true, msg:"the is demo msg"});
+  res.status(200).json({status: true, msg:"This is a demo msg!"});
 })
 
 
@@ -32,8 +32,6 @@ app.use("/clg", ScoreController.cricketlineguru);
 
 //test 
 app.use("/t", TestController.test);
-
-
 
 app.get('*/:val', (req, res) => {
   res.status(404).json({status: false, errMsg: `Opps! '${req.params.val}' Page Not Found!`
