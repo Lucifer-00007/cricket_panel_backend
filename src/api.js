@@ -9,10 +9,10 @@ function formatDateTime(unix) {
 
 
 
-
 const ScoreController = {
     // cricbuzz
     cricbuzz: async (req, res) => {
+
         let innerReturnFunction = ({ crickbuzzurls }) => {
             return { crickbuzzurls };
         }
@@ -33,32 +33,45 @@ const ScoreController = {
             "mode": "cors"
         };
 
+        // Match_status filter
+        const statusFilter = (val) => {
+            if (val == 'Complete') {
+                return 'Post';
+            } else if (val == 'Preview') {
+                return "Pre"
+            } else if (val == 'In Progress') {
+                return "Live"
+            } else {
+                return val;
+            }
+        }
+
         try {
             var result = {};
             var crickbuzzurls = [];
             fetch(`https://www.cricbuzz.com`, requestOptions).then(res => res.text()).then(chtml => {
                 const $ = cheerio.load(chtml);
-                const listItems = $("#match_menu_container div div ul li");
 
+                // Getting match_ids from carousal                
                 var TotalMatch = 0
+                const listItems = $("#match_menu_container div div ul li");
                 listItems.each((idx, el) => {
                     var id = $(el).children('a').attr('href').split("/")[2];
                     crickbuzzurls.push(`https://www.cricbuzz.com/api/cricket-match/commentary/${id}`);
-                    // console.log("Initial_Match_id:", `https://www.cricbuzz.com/api/cricket-match/commentary/${id}`);
                     TotalMatch = TotalMatch + 1;
                 });
-                // console.log("Initial match: ", TotalMatch)
 
-
+                // Getting match_ids from dropdown
                 var OtherTotalMatch = 0
                 const newListItems = $(".cb-scg-drp-dwn-ul li div");
                 newListItems.each((idx, el) => {
                     var match = $(el).children('a').attr('href');
                     var match_title = $(el).children('a').attr('title');
                     if (typeof (match) != 'undefined') {
+                        // Filtering only live match_ids 
                         if (match_title.split('-')[1] == ' Live') {
-                            var match_id = match.split("/")[2]
-                            var match_api_url = `https://www.cricbuzz.com/api/cricket-match/commentary/${match_id}`;
+                            const match_id = match.split("/")[2]
+                            const match_api_url = `https://www.cricbuzz.com/api/cricket-match/commentary/${match_id}`;
                             if (!crickbuzzurls.includes(match_api_url)) {
                                 crickbuzzurls.push(match_api_url);
                                 OtherTotalMatch = OtherTotalMatch + 1;
@@ -66,7 +79,6 @@ const ScoreController = {
                         }
                     }
                 });
-                // console.log("New added match: ", OtherTotalMatch)
 
                 return innerReturnFunction({ crickbuzzurls });
             }).then(({ crickbuzzurls }) => {
@@ -77,10 +89,12 @@ const ScoreController = {
                         .then(innerhtmls => {
                             innerhtmls.forEach(innerhtml => {
                                 if (innerhtml && innerhtml.miniscore) {
-                                    // console.log("Match_id: ", innerhtml.matchHeader.matchId);
-                                    // console.log("No_of_inns: ", innerhtml.miniscore.matchScoreDetails.inningsScoreList.length);
+                                    //This score_obj will contain live, upcoming and completed matches
+                                    const score_obj = {
+                                        match_urls: `https://www.cricbuzz.com/live-cricket-scorecard/${innerhtml.matchHeader.matchId}/${innerhtml.matchHeader.team1.shortName.toLowerCase()}-vs-${innerhtml.matchHeader.team2.shortName.toLowerCase()}-${innerhtml.matchHeader.matchDescription.replace(/\s/gm, "-").toLowerCase()}-${innerhtml.matchHeader.seriesName.replace(/(\s)|(,\s)/gm, "-").toLowerCase()}`,
 
-                                    const obj = {
+                                        match_api_url: innerhtml.matchHeader.matchId ? `https://www.cricbuzz.com/api/cricket-match/commentary/${innerhtml.matchHeader.matchId}` : '',
+
                                         start_date_time: innerhtml.matchHeader.matchStartTimestamp ? innerhtml.matchHeader.matchStartTimestamp : '',
 
                                         match_league: innerhtml.matchHeader.seriesDesc ? innerhtml.matchHeader.seriesDesc : '',
@@ -91,16 +105,18 @@ const ScoreController = {
 
                                         requiredRunRate: innerhtml.miniscore.requiredRunRate ? innerhtml.miniscore.requiredRunRate : '',
 
-                                        match_status: innerhtml.matchHeader.state ? innerhtml.matchHeader.state : '',
+                                        match_status: statusFilter(innerhtml.matchHeader.state) ? statusFilter(innerhtml.matchHeader.state) : '',
 
                                         current_inns: (innerhtml.miniscore.inningsId ? innerhtml.miniscore.inningsId : ''),
 
                                         t1: {
-                                            f: innerhtml.matchHeader.team1.id == innerhtml.miniscore.batTeam.teamId ? innerhtml.matchHeader.team1.shortName : innerhtml.matchHeader.team2.shortName,
+                                            f: innerhtml.matchHeader.team1.id == innerhtml.miniscore.batTeam.teamId ? innerhtml.matchHeader.team1.name : innerhtml.matchHeader.team2.name,
+                                            n: innerhtml.matchHeader.team1.id == innerhtml.miniscore.batTeam.teamId ? innerhtml.matchHeader.team1.shortName : innerhtml.matchHeader.team2.shortName,
                                         },
 
                                         t2: {
-                                            f: innerhtml.matchHeader.team1.id == innerhtml.miniscore.batTeam.teamId ? innerhtml.matchHeader.team2.shortName : innerhtml.matchHeader.team1.shortName,
+                                            f: innerhtml.matchHeader.team1.id == innerhtml.miniscore.batTeam.teamId ? innerhtml.matchHeader.team2.name : innerhtml.matchHeader.team1.name,
+                                            n: innerhtml.matchHeader.team1.id == innerhtml.miniscore.batTeam.teamId ? innerhtml.matchHeader.team2.shortName : innerhtml.matchHeader.team1.shortName,
                                         },
 
                                         i1: {
@@ -221,33 +237,37 @@ const ScoreController = {
                                         },
 
                                     }
-                                    result[innerhtml.matchHeader.matchId] = obj;
+                                    result[innerhtml.matchHeader.matchId] = score_obj;
 
                                 } else if (innerhtml && !innerhtml.miniscore) {
-                                    // console.log("Match_id: ", innerhtml.matchHeader.matchId);
-                                    // console.log("No_of_inns: ", '---');
+                                    //This score_obj will contain only upcoming matches
+                                    const score_obj = {
+                                        match_urls: `https://www.cricbuzz.com/live-cricket-scorecard/${innerhtml.matchHeader.matchId}/${innerhtml.matchHeader.team1.shortName.toLowerCase()}-vs-${innerhtml.matchHeader.team2.shortName.toLowerCase()}-${innerhtml.matchHeader.matchDescription.replace(/\s/gm, "-").toLowerCase()}-${innerhtml.matchHeader.seriesName.replace(/(\s)|(,\s)/gm, "-").toLowerCase()}`,
 
-                                    const obj = {
+                                        match_api_url: innerhtml.matchHeader.matchId ? `https://www.cricbuzz.com/api/cricket-match/commentary/${innerhtml.matchHeader.matchId}` : '',
+
                                         start_date_time: innerhtml.matchHeader.matchStartTimestamp ? innerhtml.matchHeader.matchStartTimestamp : '',
 
                                         match_league: innerhtml.matchHeader.seriesDesc ? innerhtml.matchHeader.seriesDesc : '',
 
-                                        completed: innerhtml.matchHeader.complete ? innerhtml.matchHeader.complete : '',
+                                        completed: innerhtml.matchHeader.complete ? (innerhtml.matchHeader.state != 'Complete' ? innerhtml.matchHeader.state : 'Post') : '',
 
                                         runrate: '',
 
                                         requiredRunRate: '',
 
-                                        match_status: innerhtml.matchHeader.state ? innerhtml.matchHeader.state : '',
+                                        match_status: statusFilter(innerhtml.matchHeader.state) ? statusFilter(innerhtml.matchHeader.state) : '',
 
                                         current_inns: '',
 
                                         t1: {
-                                            f: innerhtml.matchHeader.team1.shortName ? innerhtml.matchHeader.team1.shortName : '',
+                                            f: innerhtml.matchHeader.team1.name ? innerhtml.matchHeader.team1.name : '',
+                                            n: innerhtml.matchHeader.team1.shortName ? innerhtml.matchHeader.team1.shortName : '',
                                         },
 
                                         t2: {
-                                            f: innerhtml.matchHeader.team2.shortName ? innerhtml.matchHeader.team2.shortName : '',
+                                            f: innerhtml.matchHeader.team2.name ? innerhtml.matchHeader.team2.name : '',
+                                            n: innerhtml.matchHeader.team2.shortName ? innerhtml.matchHeader.team2.shortName : '',
                                         },
 
                                         i1: {
@@ -327,7 +347,7 @@ const ScoreController = {
                                         },
 
                                     }
-                                    result[innerhtml.matchHeader.matchId] = obj;
+                                    result[innerhtml.matchHeader.matchId] = score_obj;
                                 }
                             });
                             res.status(200).json(result);
@@ -340,6 +360,8 @@ const ScoreController = {
             res.status(400).json({ success: false, error: { message: error.message } });
 
         }
+
+        // res.status(200).json({ status: true, res: 'This is a test message!' });
     },
 
     // sportskeeda
@@ -449,7 +471,7 @@ const ScoreController = {
                 const score_obj = {
                     match_urls: `https://www.sportskeeda.com/live-cricket-score/${sc.topic_slug}`,
 
-                    match_api_url: converted ? converted : '', 
+                    match_api_url: converted ? converted : '',
 
                     match_status: (sc.match_status ? sc.match_status : ''),
 
@@ -1209,7 +1231,7 @@ const ScoreController = {
 
                     b2s: `${batsmen_nonstrick.Runs},${batsmen_nonstrick.BallsFaced},${batsmen_nonstrick.four},${batsmen_nonstrick.six}`,
 
-                    bw: live_bowler ? live_bowler: '',
+                    bw: live_bowler ? live_bowler : '',
 
                     pb: "",
                 };
@@ -1285,8 +1307,8 @@ const ScoreController = {
 
                         const score_obj = {
                             match_url: `https://www.cricketlineguru.com/match-detail/${val.key}/score`,
-                            
-                            match_api_url: scorecard_url ? scorecard_url: '',
+
+                            match_api_url: scorecard_url ? scorecard_url : '',
 
                             match_status: req_detail.status ? req_detail.status : "",
 
@@ -1403,7 +1425,7 @@ const ScoreController = {
 
 
     },
-    
+
 }
 
 module.exports = { ScoreController };
