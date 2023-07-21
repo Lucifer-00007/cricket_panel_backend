@@ -2,12 +2,32 @@
 const fetch = (...args) => import("node-fetch").then(({ default: fetch }) => fetch(...args));
 const cheerio = require('cheerio');
 
-function formatDateTime(unix) {
+//Convert unix to local_date_time
+const formatDateTime = (unix) => {
     var local_dt = new Date(unix);
     return local_dt.toLocaleString()
 }
 
+//Convert ISO_date_time to unix
+const localISOToUnix = (iso) => {
+    var unix_dt = new Date(iso)
+    unix_dt = Math.floor(unix_dt.getTime())
+    return unix_dt
+}
 
+
+//Match_status filter and capitalize
+const statusFilter = (val) => {
+    if (val == 'Complete') {
+        return 'Post';
+    } else if (val == 'Preview' || val == 'Match Yet To Begin') {
+        return "Pre"
+    } else if (val == 'In Progress' || val == 'Play In Progress') {
+        return "Live"
+    } else {
+        return val.charAt(0).toUpperCase() + val.slice(1).toLowerCase();
+    }
+}
 
 const ScoreController = {
     // cricbuzz
@@ -33,18 +53,7 @@ const ScoreController = {
             "mode": "cors"
         };
 
-        // Match_status filter
-        const statusFilter = (val) => {
-            if (val == 'Complete') {
-                return 'Post';
-            } else if (val == 'Preview') {
-                return "Pre"
-            } else if (val == 'In Progress') {
-                return "Live"
-            } else {
-                return val;
-            }
-        }
+
 
         try {
             var result = {};
@@ -105,7 +114,7 @@ const ScoreController = {
 
                                         requiredRunRate: innerhtml.miniscore.requiredRunRate ? innerhtml.miniscore.requiredRunRate : '',
 
-                                        match_status: statusFilter(innerhtml.matchHeader.state) ? statusFilter(innerhtml.matchHeader.state) : '',
+                                        match_status: innerhtml.matchHeader.state ? statusFilter(innerhtml.matchHeader.state) : '',
 
                                         current_inns: (innerhtml.miniscore.inningsId ? innerhtml.miniscore.inningsId : ''),
 
@@ -256,7 +265,7 @@ const ScoreController = {
 
                                         requiredRunRate: '',
 
-                                        match_status: statusFilter(innerhtml.matchHeader.state) ? statusFilter(innerhtml.matchHeader.state) : '',
+                                        match_status: innerhtml.matchHeader.state ? statusFilter(innerhtml.matchHeader.state) : '',
 
                                         current_inns: '',
 
@@ -472,8 +481,10 @@ const ScoreController = {
                     match_urls: `https://www.sportskeeda.com/live-cricket-score/${sc.topic_slug}`,
 
                     match_api_url: converted ? converted : '',
-
-                    match_status: (sc.match_status ? sc.match_status : ''),
+                    
+                    start_date_time: sc.datetime ? sc.datetime : '',
+                    
+                    match_status: (sc.match_status ? statusFilter(sc.match_status) : ''),
 
                     t1: {
                         f: sc.score_strip[0].name ? sc.score_strip[0].name : '',
@@ -527,7 +538,9 @@ const ScoreController = {
                     },
 
                     cs: {
-                        msg: sc.secondary_info ? sc.secondary_info : "",
+                        msg: sc.info && sc.info!='' 
+                        ? sc.info 
+                        : (sc.secondary_info ? sc.secondary_info : ""),
                     },
 
                     iov: "",
@@ -789,7 +802,11 @@ const ScoreController = {
 
                         match_api_url: req_url ? req_url : '',
 
-                        match_status: match_details.state ? match_details.state : "",
+                        start_date_time: match_details.startTime
+                            ? localISOToUnix(match_details.startTime)
+                            : "",
+
+                        match_status: match_details.state ? statusFilter(match_details.state) : "",
 
 
                         t1: {
@@ -998,10 +1015,6 @@ const ScoreController = {
 
                         title: match_details.slug ? match_details.slug : "",
 
-                        start_date_time: match_details.startTime
-                            ? match_details.startTime
-                            : "",
-
                         match_league: match_details.series.name
                             ? match_details.series.name
                             : "",
@@ -1143,7 +1156,9 @@ const ScoreController = {
 
                     match_api_url: req_url ? req_url : '',
 
-                    match_status: (sc.status ? sc.status : ''),
+                    start_date_time: '',
+
+                    match_status: (sc.status ? statusFilter(sc.status) : ''),
 
                     t1: {
                         f: (sc.teamfa ? sc.teamfa : ""),
@@ -1310,7 +1325,9 @@ const ScoreController = {
 
                             match_api_url: scorecard_url ? scorecard_url : '',
 
-                            match_status: req_detail.status ? req_detail.status : "",
+                            start_date_time: '',
+
+                            match_status: req_detail.status ? statusFilter(req_detail.status) : "",
 
                             liveInning: req_detail.inn_order.length > 0 ? req_detail.inn_order.length : "",
 
@@ -1399,11 +1416,11 @@ const ScoreController = {
                             os: "",
 
                             b1s: batsmens.length > 0
-                                ? `${batsmens[0].batting.runs},"${batsmens[0].batting.balls},"${batsmens[0].batting._4s},"${batsmens[0].batting._6s}`
+                                ? `${batsmens[0].batting.runs},${batsmens[0].batting.balls},${batsmens[0].batting._4s},${batsmens[0].batting._6s}`
                                 : '',
 
                             b2s: batsmens.length > 1
-                                ? `${batsmens[1].batting.runs},"${batsmens[1].batting.balls},"${batsmens[1].batting._4s},"${batsmens[1].batting._6s}`
+                                ? `${batsmens[1].batting.runs},${batsmens[1].batting.balls},${batsmens[1].batting._4s},${batsmens[1].batting._6s}`
                                 : '',
 
                             bw: live_bowler ? live_bowler : '',
