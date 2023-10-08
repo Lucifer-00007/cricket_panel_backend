@@ -2,9 +2,9 @@
 const fetch = (...args) => import("node-fetch").then(({ default: fetch }) => fetch(...args));
 const cheerio = require('cheerio');
 
-//Convert unix to local_date_time
+//Convert unix to local_date_time_obj
 const formatDateTime = (unix) => {
-    var local_dt = new Date(unix);
+    const local_dt = new Date(unix);
     return local_dt.toLocaleString()
 }
 
@@ -478,7 +478,7 @@ const ScoreController = {
                 }
 
                 const score_obj = {
-                    match_urls: `https://www.sportskeeda.com/live-cricket-score/${sc.topic_slug}`,
+                    match_url: `https://www.sportskeeda.com/live-cricket-score/${sc.topic_slug}`,
 
                     match_api_url: converted ? converted : '',
                     
