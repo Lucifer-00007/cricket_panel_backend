@@ -100,7 +100,7 @@ const ScoreController = {
                                 if (innerhtml && innerhtml.miniscore) {
                                     //This score_obj will contain live, upcoming and completed matches
                                     const score_obj = {
-                                        match_urls: `https://www.cricbuzz.com/live-cricket-scorecard/${innerhtml.matchHeader.matchId}/${innerhtml.matchHeader.team1.shortName.toLowerCase()}-vs-${innerhtml.matchHeader.team2.shortName.toLowerCase()}-${innerhtml.matchHeader.matchDescription.replace(/\s/gm, "-").toLowerCase()}-${innerhtml.matchHeader.seriesName.replace(/(\s)|(,\s)/gm, "-").toLowerCase()}`,
+                                        match_url: `https://www.cricbuzz.com/live-cricket-scorecard/${innerhtml.matchHeader.matchId}/${innerhtml.matchHeader.team1.shortName.toLowerCase()}-vs-${innerhtml.matchHeader.team2.shortName.toLowerCase()}-${innerhtml.matchHeader.matchDescription.replace(/\s/gm, "-").toLowerCase()}-${innerhtml.matchHeader.seriesName.replace(/(\s)|(,\s)/gm, "-").toLowerCase()}`,
 
                                         match_api_url: innerhtml.matchHeader.matchId ? `https://www.cricbuzz.com/api/cricket-match/commentary/${innerhtml.matchHeader.matchId}` : '',
 
@@ -251,7 +251,7 @@ const ScoreController = {
                                 } else if (innerhtml && !innerhtml.miniscore) {
                                     //This score_obj will contain only upcoming matches
                                     const score_obj = {
-                                        match_urls: `https://www.cricbuzz.com/live-cricket-scorecard/${innerhtml.matchHeader.matchId}/${innerhtml.matchHeader.team1.shortName.toLowerCase()}-vs-${innerhtml.matchHeader.team2.shortName.toLowerCase()}-${innerhtml.matchHeader.matchDescription.replace(/\s/gm, "-").toLowerCase()}-${innerhtml.matchHeader.seriesName.replace(/(\s)|(,\s)/gm, "-").toLowerCase()}`,
+                                        match_url: `https://www.cricbuzz.com/live-cricket-scorecard/${innerhtml.matchHeader.matchId}/${innerhtml.matchHeader.team1.shortName.toLowerCase()}-vs-${innerhtml.matchHeader.team2.shortName.toLowerCase()}-${innerhtml.matchHeader.matchDescription.replace(/\s/gm, "-").toLowerCase()}-${innerhtml.matchHeader.seriesName.replace(/(\s)|(,\s)/gm, "-").toLowerCase()}`,
 
                                         match_api_url: innerhtml.matchHeader.matchId ? `https://www.cricbuzz.com/api/cricket-match/commentary/${innerhtml.matchHeader.matchId}` : '',
 
