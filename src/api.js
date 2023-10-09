@@ -57,6 +57,31 @@ function createCbzInnList(inningsScoreList) {
     return result;
 }
 
+function CbzTeamNameOrder(team1, team2, checkTeam) {
+    let t1, t2;
+
+    if (team1.id === checkTeam.battingTeamId) {
+        t1 = {
+            f: team1.name,
+            n: team1.shortName
+        };
+        t2 = {
+            f: team2.name,
+            n: team2.shortName
+        };
+    } else {
+        t1 = {
+            f: team2.name,
+            n: team2.shortName
+        };
+        t2 = {
+            f: team1.name,
+            n: team1.shortName
+        };
+    }
+    return { t1, t2 };
+}
+
 const ScoreController = {
     // cricbuzz
     cricbuzz: async (req, res) => {
@@ -126,6 +151,7 @@ const ScoreController = {
                                 if (innerhtml && innerhtml.miniscore) {
                                     //This score_obj will contain live, upcoming and completed matches
                                     const {i1, i2, i3, i4} = createCbzInnList(innerhtml.miniscore.matchScoreDetails.inningsScoreList);
+                                    const {t1, t2} = CbzTeamNameOrder(innerhtml.matchHeader.team1, innerhtml.matchHeader.team2, innerhtml.miniscore.matchScoreDetails.matchTeamInfo[0])
 
                                     const score_obj = {
                                         match_url: `https://www.cricbuzz.com/live-cricket-scorecard/${innerhtml.matchHeader.matchId}/${innerhtml.matchHeader.team1.shortName.toLowerCase()}-vs-${innerhtml.matchHeader.team2.shortName.toLowerCase()}-${innerhtml.matchHeader.matchDescription.replace(/\s/gm, "-").toLowerCase()}-${innerhtml.matchHeader.seriesName.replace(/(\s)|(,\s)/gm, "-").toLowerCase()}`,
@@ -146,15 +172,9 @@ const ScoreController = {
 
                                         current_inns: (innerhtml.miniscore.inningsId ? innerhtml.miniscore.inningsId : ''),
                                         
-                                        t1: {
-                                            f: statusFilter(innerhtml.matchHeader.state)==='Live' ? innerhtml.matchHeader.team1.name : innerhtml.matchHeader.team2.name,
-                                            n: statusFilter(innerhtml.matchHeader.state)==='Live' ? innerhtml.matchHeader.team1.shortName : innerhtml.matchHeader.team2.shortName,
-                                        },
+                                        t1,
 
-                                        t2: {
-                                            f: statusFilter(innerhtml.matchHeader.state)==='Live' ? innerhtml.matchHeader.team2.name : innerhtml.matchHeader.team1.name,
-                                            n: statusFilter(innerhtml.matchHeader.state)==='Live' ? innerhtml.matchHeader.team2.shortName : innerhtml.matchHeader.team1.shortName,
-                                        },
+                                        t2,
 
                                         i1,
 
