@@ -29,6 +29,36 @@ const statusFilter = (val) => {
     }
 }
 
+
+function createCbzInnList(inningsScoreList) {
+    const result = {};
+
+    // First, initialize all 4 innings with default values
+    for (let i = 1; i <= 4; i++) {
+        result[`i${i}`] = {
+            sc: '0',
+            wk: '0',
+            ov: '0',
+            inningsId: i,
+        };
+    }
+
+    // Then, update with actual data if available
+    inningsScoreList.forEach((innings) => {
+        const key = `i${innings.inningsId}`;
+
+        result[key] = {
+            sc: innings.score.toString() || '0',
+            wk: innings.wickets.toString() || '0',
+            ov: innings.overs.toString() || '0',
+            inningsId: innings.inningsId,
+        };
+    });
+    return result;
+}
+
+
+
 const ScoreController = {
     // cricbuzz
     cricbuzz: async (req, res) => {
@@ -52,8 +82,6 @@ const ScoreController = {
             "method": "GET",
             "mode": "cors"
         };
-
-
 
         try {
             var result = {};
@@ -99,6 +127,8 @@ const ScoreController = {
                             innerhtmls.forEach(innerhtml => {
                                 if (innerhtml && innerhtml.miniscore) {
                                     //This score_obj will contain live, upcoming and completed matches
+                                    const {i1, i2, i3, i4} = createCbzInnList(innerhtml.miniscore.matchScoreDetails.inningsScoreList);
+
                                     const score_obj = {
                                         match_url: `https://www.cricbuzz.com/live-cricket-scorecard/${innerhtml.matchHeader.matchId}/${innerhtml.matchHeader.team1.shortName.toLowerCase()}-vs-${innerhtml.matchHeader.team2.shortName.toLowerCase()}-${innerhtml.matchHeader.matchDescription.replace(/\s/gm, "-").toLowerCase()}-${innerhtml.matchHeader.seriesName.replace(/(\s)|(,\s)/gm, "-").toLowerCase()}`,
 
@@ -117,57 +147,24 @@ const ScoreController = {
                                         match_status: innerhtml.matchHeader.state ? statusFilter(innerhtml.matchHeader.state) : '',
 
                                         current_inns: (innerhtml.miniscore.inningsId ? innerhtml.miniscore.inningsId : ''),
-
+                                        
                                         t1: {
-                                            f: innerhtml.matchHeader.team1.id == innerhtml.miniscore.batTeam.teamId ? innerhtml.matchHeader.team1.name : innerhtml.matchHeader.team2.name,
-                                            n: innerhtml.matchHeader.team1.id == innerhtml.miniscore.batTeam.teamId ? innerhtml.matchHeader.team1.shortName : innerhtml.matchHeader.team2.shortName,
+                                            f: innerhtml.matchHeader.team2.name,
+                                            n: innerhtml.matchHeader.team2.shortName,
                                         },
 
                                         t2: {
-                                            f: innerhtml.matchHeader.team1.id == innerhtml.miniscore.batTeam.teamId ? innerhtml.matchHeader.team2.name : innerhtml.matchHeader.team1.name,
-                                            n: innerhtml.matchHeader.team1.id == innerhtml.miniscore.batTeam.teamId ? innerhtml.matchHeader.team2.shortName : innerhtml.matchHeader.team1.shortName,
+                                            f: innerhtml.matchHeader.team1.name,
+                                            n: innerhtml.matchHeader.team1.shortName,
                                         },
 
-                                        i1: {
-                                            sc: innerhtml.miniscore.batTeam.teamScore ? innerhtml.miniscore.batTeam.teamScore.toString() : '0',
+                                        i1,
 
-                                            wk: innerhtml.miniscore.batTeam.teamWkts ? innerhtml.miniscore.batTeam.teamWkts.toString() : '0',
+                                        i2,
 
-                                            ov: innerhtml.miniscore.matchScoreDetails.inningsScoreList.length < 1 ? '0' : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 0 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].batTeamId == innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].inningsId == 1 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].overs.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 1 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].batTeamId == innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].inningsId == 1 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].overs.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 2 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].batTeamId == innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].inningsId == 1 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].overs.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 3 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].batTeamId == innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].inningsId == 1 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].overs.toString() : '0')))),
-                                        },
+                                        i3,
 
-                                        i2: {
-                                            sc: innerhtml.miniscore.matchScoreDetails.inningsScoreList.length < 1 ? '0' : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 0 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].inningsId == 2 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].score.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 1 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].inningsId == 2 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].score.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 2 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].inningsId == 2 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].score.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 3 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].inningsId == 2 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].score.toString() : '0')))),
-
-                                            wk: innerhtml.miniscore.matchScoreDetails.inningsScoreList.length < 1 ? '0' : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 0 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].inningsId == 2 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].wickets.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 1 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].inningsId == 2 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].wickets.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 2 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].inningsId == 2 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].wickets.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 3 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].inningsId == 2 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].wickets.toString() : '0')))),
-
-                                            ov: innerhtml.miniscore.matchScoreDetails.inningsScoreList.length < 1 ? '0' : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 0 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].inningsId == 2 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].overs.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 1 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].inningsId == 2 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].overs.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 2 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].inningsId == 2 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].overs.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 3 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].inningsId == 2 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].overs.toString() : '0')))),
-
-                                            tr:
-                                                innerhtml.miniscore.inningsId == 2 &&
-                                                    innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 1
-                                                    ? (
-                                                        innerhtml.miniscore.matchScoreDetails.inningsScoreList[1]
-                                                            .score + 1
-                                                    ).toString()
-                                                    : '0',
-                                        },
-
-                                        i3: {
-                                            sc: innerhtml.miniscore.matchScoreDetails.inningsScoreList.length < 1 ? '0' : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 0 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].batTeamId == innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].inningsId == 3 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].score.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 1 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].batTeamId == innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].inningsId == 3 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].score.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 2 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].batTeamId == innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].inningsId == 3 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].score.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 3 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].batTeamId == innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].inningsId == 3 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].score.toString() : '0')))),
-
-                                            wk: innerhtml.miniscore.matchScoreDetails.inningsScoreList.length < 1 ? '0' : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 0 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].batTeamId == innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].inningsId == 3 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].wickets.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 1 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].batTeamId == innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].inningsId == 3 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].wickets.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 2 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].batTeamId == innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].inningsId == 3 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].wickets.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 3 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].batTeamId == innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].inningsId == 3 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].wickets.toString() : '0')))),
-
-                                            ov: innerhtml.miniscore.matchScoreDetails.inningsScoreList.length < 1 ? '0' : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 0 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].batTeamId == innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].inningsId == 3 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].overs.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 1 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].batTeamId == innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].inningsId == 3 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].overs.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 2 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].batTeamId == innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].inningsId == 3 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].overs.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 3 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].batTeamId == innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].inningsId == 3 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].overs.toString() : '0')))),
-                                        },
-
-                                        i4: {
-                                            sc: innerhtml.miniscore.matchScoreDetails.inningsScoreList.length < 1 ? '0' : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 0 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].inningsId == 4 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].score.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 1 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].inningsId == 4 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].score.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 2 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].inningsId == 4 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].score.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 3 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].inningsId == 4 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].score.toString() : '0')))),
-
-                                            wk: innerhtml.miniscore.matchScoreDetails.inningsScoreList.length < 1 ? '0' : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 0 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].inningsId == 4 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].wickets.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 1 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].inningsId == 4 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].wickets.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 2 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].inningsId == 4 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].wickets.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 3 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].inningsId == 4 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].wickets.toString() : '0')))),
-
-                                            ov: innerhtml.miniscore.matchScoreDetails.inningsScoreList.length < 1 ? '0' : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 0 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].inningsId == 4 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[0].overs.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 1 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].inningsId == 4 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[1].overs.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 2 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].inningsId == 4 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[2].overs.toString() : (innerhtml.miniscore.matchScoreDetails.inningsScoreList.length > 3 && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].batTeamId != innerhtml.miniscore.batTeam.teamId && innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].inningsId == 4 ? innerhtml.miniscore.matchScoreDetails.inningsScoreList[3].overs.toString() : '0')))),
-                                        },
+                                        i4,
 
                                         cs: {
                                             msg: innerhtml.miniscore.status ? innerhtml.miniscore.status : '',
@@ -280,37 +277,37 @@ const ScoreController = {
                                         },
 
                                         i1: {
-                                            sc: '',
+                                            sc: '0',
 
-                                            wk: '',
+                                            wk: '0',
 
-                                            ov: '',
+                                            ov: '0',
                                         },
 
                                         i2: {
-                                            sc: '',
+                                            sc: '0',
 
-                                            wk: '',
+                                            wk: '0',
 
-                                            ov: '',
+                                            ov: '0',
 
-                                            tr: '',
+                                            tr: '0',
                                         },
 
                                         i3: {
-                                            sc: '',
+                                            sc: '0',
 
-                                            wk: '',
+                                            wk: '0',
 
-                                            ov: '',
+                                            ov: '0',
                                         },
 
                                         i4: {
-                                            sc: '',
+                                            sc: '0',
 
-                                            wk: '',
+                                            wk: '0',
 
-                                            ov: '',
+                                            ov: '0',
                                         },
 
                                         cs: {
@@ -360,7 +357,6 @@ const ScoreController = {
                                 }
                             });
                             res.status(200).json(result);
-
                         })
                 }
             });
@@ -481,9 +477,9 @@ const ScoreController = {
                     match_url: `https://www.sportskeeda.com/live-cricket-score/${sc.topic_slug}`,
 
                     match_api_url: converted ? converted : '',
-                    
+
                     start_date_time: sc.datetime ? sc.datetime : '',
-                    
+
                     match_status: (sc.match_status ? statusFilter(sc.match_status) : ''),
 
                     t1: {
@@ -538,9 +534,9 @@ const ScoreController = {
                     },
 
                     cs: {
-                        msg: sc.info && sc.info!='' 
-                        ? sc.info 
-                        : (sc.secondary_info ? sc.secondary_info : ""),
+                        msg: sc.info && sc.info != ''
+                            ? sc.info
+                            : (sc.secondary_info ? sc.secondary_info : ""),
                     },
 
                     iov: "",

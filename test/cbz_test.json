@@ -1,0 +1,155 @@
+{
+    "miniscore": {
+        "inningsId": 2,
+        "batsmanStriker": {
+            "batBalls": 115,
+            "batDots": 57,
+            "batFours": 8,
+            "batId": 8733,
+            "batName": "KL Rahul",
+            "batMins": 189,
+            "batRuns": 97,
+            "batSixes": 2,
+            "batStrikeRate": 84.35
+        },
+        "batsmanNonStriker": {
+            "batBalls": 8,
+            "batDots": 2,
+            "batFours": 0,
+            "batId": 9647,
+            "batName": "Hardik Pandya",
+            "batMins": 19,
+            "batRuns": 11,
+            "batSixes": 1,
+            "batStrikeRate": 137.5
+        },
+        "batTeam": {
+            "teamId": 2,
+            "teamScore": 201,
+            "teamWkts": 4
+        },
+        "bowlerStriker": {
+            "bowlId": 8095,
+            "bowlName": "Pat Cummins",
+            "bowlMaidens": 0,
+            "bowlNoballs": 1,
+            "bowlOvs": 6.2,
+            "bowlRuns": 33,
+            "bowlWides": 1,
+            "bowlWkts": 0,
+            "bowlEcon": 5.21
+        },
+        "bowlerNonStriker": {
+            "bowlId": 7662,
+            "bowlName": "Glenn Maxwell",
+            "bowlMaidens": 0,
+            "bowlNoballs": 0,
+            "bowlOvs": 8,
+            "bowlRuns": 33,
+            "bowlWides": 0,
+            "bowlWkts": 0,
+            "bowlEcon": 4.13
+        },
+        "overs": 41.2,
+        "recentOvsStats": "... Wd 1 6 0  | 6 4 1 1 0 1  | 0 6",
+        "target": 200,
+        "partnerShip": {
+            "balls": 22,
+            "runs": 34
+        },
+        "currentRunRate": 4.86,
+        "requiredRunRate": 0,
+        "lastWicket": "Virat Kohli  c Labuschagne b Hazlewood 85(116)  - 167/4 in 37.4 ov.",
+        "matchScoreDetails": {
+            "matchId": 75437,
+            "inningsScoreList": [
+                {
+                    "inningsId": 2,
+                    "batTeamId": 2,
+                    "batTeamName": "IND",
+                    "score": 201,
+                    "wickets": 4,
+                    "overs": 41.2,
+                    "isDeclared": false,
+                    "isFollowOn": false,
+                    "ballNbr": 248
+                },
+                {
+                    "inningsId": 1,
+                    "batTeamId": 4,
+                    "batTeamName": "AUS",
+                    "score": 199,
+                    "wickets": 10,
+                    "overs": 49.3,
+                    "isDeclared": false,
+                    "isFollowOn": false,
+                    "ballNbr": 297
+                }
+            ],
+            "tossResults": {
+                "tossWinnerId": 4,
+                "tossWinnerName": "Australia",
+                "decision": "Batting"
+            },
+            "matchTeamInfo": [
+                {
+                    "battingTeamId": 4,
+                    "battingTeamShortName": "AUS",
+                    "bowlingTeamId": 2,
+                    "bowlingTeamShortName": "IND"
+                },
+                {
+                    "battingTeamId": 2,
+                    "battingTeamShortName": "IND",
+                    "bowlingTeamId": 4,
+                    "bowlingTeamShortName": "AUS"
+                }
+            ],
+            "isMatchNotCovered": false,
+            "matchFormat": "ODI",
+            "state": "Complete",
+            "customStatus": "India won by 6 wkts",
+            "highlightedTeamId": 2
+        },
+        "latestPerformance": [
+            {
+                "runs": 37,
+                "wkts": 1,
+                "label": "Last 5 overs"
+            },
+            {
+                "runs": 74,
+                "wkts": 1,
+                "label": "Last 10 overs"
+            }
+        ],
+        "ppData": {
+            "pp_1": {
+                "ppId": 5,
+                "ppOversFrom": 0.1,
+                "ppOversTo": 10,
+                "ppType": "mandatory",
+                "runsScored": 27
+            }
+        },
+        "matchUdrs": {
+            "matchId": 75437,
+            "inningsId": 2,
+            "timestamp": "2023-10-08T13:07:42.820Z",
+            "team1Id": 2,
+            "team1Remaining": 2,
+            "team1Successful": 1,
+            "team1Unsuccessful": 0,
+            "team2Id": 4,
+            "team2Remaining": 2,
+            "team2Successful": 0,
+            "team2Unsuccessful": 0
+        },
+        "overSummaryList": [],
+        "status": "India won by 6 wkts",
+        "lastWicketScore": 85,
+        "remRunsToWin": 0,
+        "responseLastUpdated": 1696840016,
+        "event": "TEAM_HUNDRED,SIX"
+    }
+}
