@@ -57,8 +57,6 @@ function createCbzInnList(inningsScoreList) {
     return result;
 }
 
-
-
 const ScoreController = {
     // cricbuzz
     cricbuzz: async (req, res) => {
@@ -149,13 +147,13 @@ const ScoreController = {
                                         current_inns: (innerhtml.miniscore.inningsId ? innerhtml.miniscore.inningsId : ''),
                                         
                                         t1: {
-                                            f: innerhtml.matchHeader.team2.name,
-                                            n: innerhtml.matchHeader.team2.shortName,
+                                            f: statusFilter(innerhtml.matchHeader.state)==='Live' ? innerhtml.matchHeader.team1.name : innerhtml.matchHeader.team2.name,
+                                            n: statusFilter(innerhtml.matchHeader.state)==='Live' ? innerhtml.matchHeader.team1.shortName : innerhtml.matchHeader.team2.shortName,
                                         },
 
                                         t2: {
-                                            f: innerhtml.matchHeader.team1.name,
-                                            n: innerhtml.matchHeader.team1.shortName,
+                                            f: statusFilter(innerhtml.matchHeader.state)==='Live' ? innerhtml.matchHeader.team2.name : innerhtml.matchHeader.team1.name,
+                                            n: statusFilter(innerhtml.matchHeader.state)==='Live' ? innerhtml.matchHeader.team2.shortName : innerhtml.matchHeader.team1.shortName,
                                         },
 
                                         i1,
